@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: bf05f36d243748f449e048f97abc1f31
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 133905
+  packageName: Free basic Dungeon
+  packageVersion: 1.0
+  assetPath: Assets/FreeDungeon/Materials/dungeonMaterial 2.mat
+  uploadId: 280803

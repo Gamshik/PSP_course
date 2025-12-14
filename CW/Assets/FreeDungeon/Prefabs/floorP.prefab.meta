@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 1f0a2a361c3075b43a561095f4a678a4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 133905
+  packageName: Free basic Dungeon
+  packageVersion: 1.0
+  assetPath: Assets/FreeDungeon/Prefabs/floorP.prefab
+  uploadId: 280803

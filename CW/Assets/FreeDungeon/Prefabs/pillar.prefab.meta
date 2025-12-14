@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b755346e6abd373439d43487f7f760c6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 133905
+  packageName: Free basic Dungeon
+  packageVersion: 1.0
+  assetPath: Assets/FreeDungeon/Prefabs/pillar.prefab
+  uploadId: 280803

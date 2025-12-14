@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: f103539b8d002d648917507fcb1b8eea
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 133905
+  packageName: Free basic Dungeon
+  packageVersion: 1.0
+  assetPath: Assets/FreeDungeon/DemoScene.unity
+  uploadId: 280803

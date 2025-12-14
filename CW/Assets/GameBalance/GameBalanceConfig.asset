@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95747145a88ff0947843442e809038c8, type: 3}
+  m_Name: GameBalanceConfig
+  m_EditorClassIdentifier: Assembly-CSharp::GameBalanceConfig
+  MoveSpeed: 6
+  MeleeBaseDamage: 20
+  MeleeDamagePerLevel: 10
+  MeleeCooldown: 0.8
+  MeleeRadius: 2.5
+  MeleeAngle: 90
+  MeleeAnimDuration: 0.2
+  RangeDamage: 50
+  RangeBaseFireRate: 1
+  RangeFireRateReductionPerLevel: 0.2
+  ProjectileSpeed: 12
+  ProjectileLifeTime: 3
+  BaseHp: 100
+  HpPerLevel: 25
+  HealBaseAmount: 30
+  HealPerLevel: 15
+  HealCooldown: 10
+  HealDistance: 4
+  BossHp: 200
+  BossMoveSpeed: 3
+  BossContactDamage: 30
+  BossKnockbackForce: 5
+  BossProjectileDamage: 5
+  BossProjectileSpeed: 8
+  BossShootInterval: 2
+  BossProjectilesCount: 12
+  PuzzleCubePushForce: 5
+  PuzzleCubeRadius: 0.95
+  ColorShowInterval: 1
+  ColorBaseSequenceLength: 3
+  ColorDamageOnFail: 20
+  ColorRoundDelay: 2
+  LaserTrackingSpeed: 15
+  LaserChargeSpeed: 15
+  LaserLength: 20
+  LaserWidthAngle: 10
+  LaserDamage: 20

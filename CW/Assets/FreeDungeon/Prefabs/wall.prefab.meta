@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: da24672af79d5b04da5388660c6aabd9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 133905
+  packageName: Free basic Dungeon
+  packageVersion: 1.0
+  assetPath: Assets/FreeDungeon/Prefabs/wall.prefab
+  uploadId: 280803
