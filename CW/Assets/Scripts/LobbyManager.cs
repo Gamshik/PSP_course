@@ -498,7 +498,7 @@ public class LobbyManager : MonoBehaviour
         GUIUtility.systemCopyBuffer = _currentIpAddress;
 
         if (_ipDisplayText != null)
-            _ipDisplayText.text = $"COPIED!\n{_currentIpAddress}";
+            _ipDisplayText.text = $"COPIED! {_currentIpAddress}";
 
         Debug.Log("IP copied to clipboard: " + _currentIpAddress);
     }

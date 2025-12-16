@@ -297,69 +297,87 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        foreach (var p in _serverPlayers)
+        // движение игроков
+       foreach (var p in _serverPlayers)
         {
             if (p.IsDead) continue;
+            // Таймеры
             if (p.MeleeTimer > 0) p.MeleeTimer -= Time.deltaTime;
             if (p.RangeTimer > 0) p.RangeTimer -= Time.deltaTime;
             if (p.HealTimer > 0) p.HealTimer -= Time.deltaTime;
-
-
             if (p.InvulnerabilityTimer > 0) p.InvulnerabilityTimer -= Time.deltaTime;
 
+            // Сброс высоты
             p.Position.y = 0;
 
             Vector3 movement = p.InputMove * Balance.MoveSpeed * Time.deltaTime;
 
-            if (movement.sqrMagnitude > 0.0001f)
-            {
-                Vector3 origin = p.Position + Vector3.up * 0.5f;
-                float checkRadius = 0.4f;
-                float checkDist = movement.magnitude;
+            // Даже если игрок не жмет кнопки, мы проверяем, не застрял ли он в стене
+            // (Это важно, если его туда втолкнули)
+            bool isTryingToMove = movement.sqrMagnitude > 0.0001f;
+            
+            // Точка проверки
+            Vector3 origin = p.Position + Vector3.up * 1.0f;
+            float checkRadius = 0.4f; 
+            
+            // Если стоим на месте, проверяем минимальную дистанцию, чтобы вытолкнуть из стены
+            float checkDist = isTryingToMove ? movement.magnitude : 0.1f; 
+            Vector3 checkDir = isTryingToMove ? movement.normalized : p.Rotation * Vector3.forward;
 
-                // проверяем столкновение со стеной
-                if (Physics.SphereCast(
-                    origin,
-                    checkRadius,
-                    movement.normalized,
-                    out RaycastHit hit,
-                    checkDist + 0.1f,
-                    LayerMask.GetMask("Obstacle"),
-                    QueryTriggerInteraction.Ignore))
+            if (Physics.SphereCast(
+                origin,
+                checkRadius,
+                checkDir,
+                out RaycastHit hit,
+                checkDist + 0.1f,
+                LayerMask.GetMask("Obstacle"),
+                QueryTriggerInteraction.Ignore))
+            {
+                // --- АНТИ-ЗАСТРЕВАНИЕ ---
+                // Если мы слишком близко к стене (или внутри неё)
+                if (hit.distance < 0.05f)
                 {
+                    // Толкаем игрока ОТ стены по нормали
+                    // Это "отлепляет" его, позволяя снова двигаться
+                    Vector3 pushOut = hit.normal * (0.05f - hit.distance);
+                    pushOut.y = 0;
+                    p.Position += pushOut;
+                }
+
+                if (isTryingToMove)
+                {
+                    // --- ОБЫЧНОЕ СКОЛЬЖЕНИЕ ---
+                    // Подходим к стене
                     float distToWall = Mathf.Max(0, hit.distance - 0.01f);
                     p.Position += movement.normalized * distToWall;
 
-                    // скольжение
+                    // Скользим
                     Vector3 slideMovement = Vector3.ProjectOnPlane(movement, hit.normal);
                     slideMovement.y = 0;
 
+                    // Проверка второй стены (Угол)
                     Vector3 slideOrigin = p.Position + Vector3.up * 1.0f;
                     float slideDist = slideMovement.magnitude;
 
                     if (slideDist > 0.0001f)
                     {
-                        if (!Physics.SphereCast(
-                            slideOrigin,
-                            checkRadius,
-                            slideMovement.normalized,
-                            out RaycastHit slideHit,
-                            slideDist + 0.1f,
-                            LayerMask.GetMask("Obstacle"),
-                            QueryTriggerInteraction.Ignore))
+                        if (!Physics.SphereCast(slideOrigin, checkRadius, slideMovement.normalized, out RaycastHit slideHit, slideDist + 0.1f, LayerMask.GetMask("Obstacle"), QueryTriggerInteraction.Ignore))
                         {
                             p.Position += slideMovement;
                         }
                     }
                 }
-                else
-                {
-                    p.Position += movement;
-                }
+            }
+            else if (isTryingToMove)
+            {
+                // Путь свободен
+                p.Position += movement;
             }
 
-            p.Position.y = 0.51f;
+            // Финальная страховка Y
+            p.Position.y = 0;
 
+            // Поворот
             Vector3 dir = p.InputLook - p.Position;
             if (dir != Vector3.zero) p.Rotation = Quaternion.LookRotation(new Vector3(dir.x, 0, dir.z));
         }
@@ -377,13 +395,37 @@ public class GameManager : MonoBehaviour
                 float dist = Vector3.Distance(p1.Position, p2.Position);
                 if (dist < playerRadius * 2)
                 {
-                    Vector3 push = (p1.Position - p2.Position).normalized * (playerRadius * 2 - dist) * 0.5f;
-                    if (push == Vector3.zero) push = Vector3.right * 0.1f;
-                    p1.Position += push; p2.Position -= push;
+                    Vector3 dir = (p1.Position - p2.Position).normalized;
+                    if (dir == Vector3.zero) dir = Vector3.right;
+
+                    float pushDist = (playerRadius * 2 - dist) * 0.5f;
+                    Vector3 pushVector = dir * pushDist;
+
+                    // Толкаем P1
+                    // Вместо полной отмены (IsPathClear), пробуем подвинуть сколько сможем
+                    TryPushPlayer(p1, pushVector);
+
+                    // Толкаем P2
+                    TryPushPlayer(p2, -pushVector);
                 }
             }
         }
 
+        if (_activeEncounterIndex != -1)
+        {
+            ServerEncounter active = _allEncounters.Find(e => e.Id == _activeEncounterIndex);
+            if (active != null && !active.IsCompleted)
+            {
+                Bounds b = active.Setup.TriggerBounds.bounds;
+                foreach (var p in _serverPlayers)
+                {
+                    // Принудительно возвращаем всех, кто мог вылететь, внутрь арены
+                    p.Position.x = Mathf.Clamp(p.Position.x, b.min.x + playerRadius, b.max.x - playerRadius);
+                    p.Position.z = Mathf.Clamp(p.Position.z, b.min.z + playerRadius, b.max.z - playerRadius);
+                }
+            }
+        }
+        
         UpdatePlayerProjectiles();
         UpdateBossProjectiles();
 
@@ -891,6 +933,13 @@ public class GameManager : MonoBehaviour
                         UI.HideWaitingPanel();
                     } 
                 }
+                else if (type == PacketType.ServerShutdown)
+                {
+                    // Читаем причину ("VICTORY" или другое)
+                    string reason = r.ReadString();
+                    // Выходим в меню с этой причиной
+                    ForceDisconnect(reason);
+                }
                 else if (type == PacketType.GameState)
                 {
                     _lastServerHeartbeat = System.DateTime.Now;
@@ -1005,6 +1054,9 @@ public class GameManager : MonoBehaviour
                     {
                         if (_visualBoss) _visualBoss.UpdateState(Vector3.zero, 0, 0, 0, false);
                         if (_visualPuzzleBall) _visualPuzzleBall.UpdateState(Vector3.zero, false, false);
+
+                        if (_visualColorPuzzle) _visualColorPuzzle.gameObject.SetActive(false); 
+                        if (_visualLaserPuzzle) _visualLaserPuzzle.gameObject.SetActive(false);
                     }
 
                     foreach (var b in _visualBossBullets) Destroy(b); _visualBossBullets.Clear();
@@ -1016,7 +1068,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Синхронизирует сервер и UI
+    /// Синхронизирует сервер и UI хоста
     /// </summary>
     private void SyncVisualsHost()
     {
@@ -1145,10 +1197,21 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"Game Over: {reason}. Sending shutdown packets...");
 
-        byte[] data = new byte[] { (byte)PacketType.ServerShutdown };
-
+        // Записываем причину в NetworkManager для Хоста
         NetworkManager.Instance.DisconnectReason = reason;
 
+        // --- ИСПРАВЛЕНИЕ: Формируем пакет с текстом ---
+        byte[] data;
+        using (MemoryStream ms = new MemoryStream())
+        using (BinaryWriter w = new BinaryWriter(ms))
+        {
+            w.Write((byte)PacketType.ServerShutdown);
+            w.Write(reason); // Записываем строку "VICTORY" или причину смерти
+            data = ms.ToArray();
+        }
+        // ----------------------------------------------
+
+        // Отправляем 5 раз для надежности
         for (int i = 0; i < 5; i++)
         {
             foreach (var p in _serverPlayers)
@@ -1161,7 +1224,6 @@ public class GameManager : MonoBehaviour
                     NetworkManager.Instance.SendPacketTo(data, target);
                 }
             }
-            
             yield return new WaitForSeconds(0.1f);
         }
 
@@ -1421,6 +1483,27 @@ public class GameManager : MonoBehaviour
         if (active.Id >= _allEncounters.Count - 1)
         {
             SendGameOver("VICTORY");
+        }
+    }
+
+    // Метод пытается подвинуть игрока, но останавливает перед стеной
+    private void TryPushPlayer(ServerPlayer p, Vector3 pushVector)
+    {
+        float dist = pushVector.magnitude;
+        if (dist < 0.001f) return;
+
+        Vector3 origin = p.Position + Vector3.up * 1.0f;
+        
+        if (Physics.SphereCast(origin, 0.4f, pushVector.normalized, out RaycastHit hit, dist + 0.1f, LayerMask.GetMask("Obstacle"), QueryTriggerInteraction.Ignore))
+        {
+            // Если стена, двигаем вплотную к ней
+            float safeDist = Mathf.Max(0, hit.distance - 0.01f);
+            p.Position += pushVector.normalized * safeDist;
+        }
+        else
+        {
+            // Путь чист
+            p.Position += pushVector;
         }
     }
 }

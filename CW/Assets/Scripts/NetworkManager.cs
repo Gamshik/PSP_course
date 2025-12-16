@@ -101,7 +101,7 @@ public class NetworkManager : MonoBehaviour
         try
         {
             _udpClient = new UdpClient(Port);
-            // Включаем хак для Windows, чтобы не крашилось при ICMP ошибках (если вдург отправили на непрослушиваемый порт)
+            // хак для Windows, чтобы не крашилось при ICMP ошибках (если вдург отправили на непрослушиваемый порт)
             uint IOC_IN = 0x80000000;
             uint IOC_VENDOR = 0x18000000;
             uint SIO_UDP_CONNRESET = IOC_IN | IOC_VENDOR | 12;

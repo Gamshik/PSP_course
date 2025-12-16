@@ -73,8 +73,6 @@ public class GameUIController : MonoBehaviour
     {
         _isPaused = !_isPaused;
         _pausePanel.SetActive(_isPaused);
-        Cursor.visible = _isPaused;
-        Cursor.lockState = _isPaused ? CursorLockMode.None : CursorLockMode.Locked;
     }
 
     private void DisconnectToMenu()
@@ -86,7 +84,6 @@ public class GameUIController : MonoBehaviour
         }
         else
         {
-            // Резервный вариант
             NetworkManager.Instance.Shutdown();
             SceneManager.LoadScene("MenuScene");
         }
