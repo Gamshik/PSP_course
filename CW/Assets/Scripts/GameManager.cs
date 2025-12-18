@@ -301,7 +301,7 @@ public class GameManager : MonoBehaviour
        foreach (var p in _serverPlayers)
         {
             if (p.IsDead) continue;
-            // Таймеры
+            
             if (p.MeleeTimer > 0) p.MeleeTimer -= Time.deltaTime;
             if (p.RangeTimer > 0) p.RangeTimer -= Time.deltaTime;
             if (p.HealTimer > 0) p.HealTimer -= Time.deltaTime;
@@ -313,7 +313,7 @@ public class GameManager : MonoBehaviour
             Vector3 movement = p.InputMove * Balance.MoveSpeed * Time.deltaTime;
 
             // Даже если игрок не жмет кнопки, мы проверяем, не застрял ли он в стене
-            // (Это важно, если его туда втолкнули)
+            // (если его туда втолкнули)
             bool isTryingToMove = movement.sqrMagnitude > 0.0001f;
             
             // Точка проверки
@@ -333,12 +333,10 @@ public class GameManager : MonoBehaviour
                 LayerMask.GetMask("Obstacle"),
                 QueryTriggerInteraction.Ignore))
             {
-                // --- АНТИ-ЗАСТРЕВАНИЕ ---
                 // Если мы слишком близко к стене (или внутри неё)
                 if (hit.distance < 0.05f)
                 {
                     // Толкаем игрока ОТ стены по нормали
-                    // Это "отлепляет" его, позволяя снова двигаться
                     Vector3 pushOut = hit.normal * (0.05f - hit.distance);
                     pushOut.y = 0;
                     p.Position += pushOut;
@@ -346,7 +344,6 @@ public class GameManager : MonoBehaviour
 
                 if (isTryingToMove)
                 {
-                    // --- ОБЫЧНОЕ СКОЛЬЖЕНИЕ ---
                     // Подходим к стене
                     float distToWall = Mathf.Max(0, hit.distance - 0.01f);
                     p.Position += movement.normalized * distToWall;
@@ -401,11 +398,8 @@ public class GameManager : MonoBehaviour
                     float pushDist = (playerRadius * 2 - dist) * 0.5f;
                     Vector3 pushVector = dir * pushDist;
 
-                    // Толкаем P1
-                    // Вместо полной отмены (IsPathClear), пробуем подвинуть сколько сможем
                     TryPushPlayer(p1, pushVector);
 
-                    // Толкаем P2
                     TryPushPlayer(p2, -pushVector);
                 }
             }

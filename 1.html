@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Диаграмма вариантов использования - Проект "Подземелье"</title>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+      mermaid.initialize({ startOnLoad: true, theme: "default" });
+    </script>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f4;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+      h1 {
+        color: #333;
+      }
+      .diagram-container {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 1200px;
+        overflow: auto;
+      }
+      /* Стили для печати на А1 */
+      @media print {
+        body {
+          background: white;
+        }
+        .diagram-container {
+          box-shadow: none;
+          border: none;
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Диаграмма вариантов использования (Use Case Diagram)</h1>
+    <p>Проект: Сетевая игра «Подземелье» | Протокол: UDP</p>
+
+    <div class="diagram-container">
+      <pre class="mermaid">
+            usecaseDiagram
+                actor "Игрок (Клиент/Хост)" as Player
+
+                package "Подсистема: Меню и Лобби" {
+                    usecase "Ввод имени и IP" as UC_Auth
+                    usecase "Создание сервера (Хост)" as UC_Host
+                    usecase "Подключение к серверу" as UC_Join
+                    usecase "Выбор игрового слота (Цвета)" as UC_Slot
+                    usecase "Прокачка характеристик" as UC_Upgrade
+                    usecase "Распределение очков (4 pts)" as UC_Points
+                    usecase "Подтверждение готовности" as UC_Ready
+                }
+
+                package "Подсистема: Базовый Геймплей" {
+                    usecase "Перемещение персонажа (WASD)" as UC_Move
+                    usecase "Вращение камеры (Мышь)" as UC_Look
+                    usecase "Ближний бой (Меч)" as UC_Melee
+                    usecase "Дальний бой (Стрельба)" as UC_Range
+                    usecase "Использование лечения" as UC_Heal
+                    usecase "Выход в меню / Пауза" as UC_Pause
+                }
+
+                package "Подсистема: Энкаунтеры (Комнаты)" {
+                    usecase "Сражение с Боссом" as UC_Boss
+                    usecase "Уничтожение снарядов мечом" as UC_Deflect
+                    
+                    usecase "Решение головоломки 'Футбол'" as UC_PuzzleSoccer
+                    usecase "Толкание мяча мечом" as UC_PushBall
+                    
+                    usecase "Решение головоломки 'Цвета'" as UC_PuzzleColors
+                    usecase "Запоминание последовательности" as UC_Memorize
+                    usecase "Активация колонн" as UC_HitPillar
+                    
+                    usecase "Решение головоломки 'Лазер'" as UC_PuzzleLaser
+                    usecase "Зарядка плит (Удержание позиции)" as UC_ChargePlate
+                    usecase "Уклонение от лазера" as UC_DodgeLaser
+                }
+
+                %% Связи Лобби
+                Player --> UC_Auth
+                UC_Auth --> UC_Host : extend
+                UC_Auth --> UC_Join : extend
+                Player --> UC_Slot
+                Player --> UC_Upgrade
+                UC_Upgrade ..> UC_Points : include
+                Player --> UC_Ready
+
+                %% Связи Геймплея
+                Player --> UC_Move
+                Player --> UC_Look
+                Player --> UC_Melee
+                Player --> UC_Range
+                Player --> UC_Heal
+                Player --> UC_Pause
+
+                %% Связи Энкаунтеров
+                Player --> UC_Boss
+                UC_Boss ..> UC_Deflect : extend
+                UC_Deflect --> UC_Melee : uses
+
+                Player --> UC_PuzzleSoccer
+                UC_PuzzleSoccer ..> UC_PushBall : include
+                UC_PushBall --> UC_Melee : uses
+
+                Player --> UC_PuzzleColors
+                UC_PuzzleColors ..> UC_Memorize : include
+                UC_PuzzleColors ..> UC_HitPillar : include
+                UC_HitPillar --> UC_Melee : uses
+
+                Player --> UC_PuzzleLaser
+                UC_PuzzleLaser ..> UC_ChargePlate : include
+                UC_PuzzleLaser ..> UC_DodgeLaser : include
+                UC_DodgeLaser --> UC_Move : uses
+
+        </pre
+      >
+    </div>
+  </body>
+</html>
